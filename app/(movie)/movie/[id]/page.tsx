@@ -59,13 +59,11 @@ export default function MovieDetailsPage() {
         const data: MovieDetails = await res.json();
         setMovie(data);
 
-        // Get Trailer
         const officialTrailer = data.videos?.results.find(
           (vid) => vid.type === "Trailer" && vid.site === "YouTube"
         );
         setTrailer(officialTrailer ? officialTrailer.key : null);
 
-        // Get Similar Movies
         setSimilarMovies(data.similar?.results || []);
       } catch (error) {
         console.error("Error fetching movie details:", error);
@@ -130,7 +128,6 @@ export default function MovieDetailsPage() {
 
   return (
     <div className="bg-blue-600/70 text-gray-900 min-h-screen">
-      {/* Backdrop Image */}
       <div className="relative w-full h-[500px] overflow-hidden">
         {movie.backdrop_path && (
           <Image
@@ -143,10 +140,8 @@ export default function MovieDetailsPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"></div>
       </div>
 
-      {/* Movie Content */}
       <div className="container mx-auto px-4 -mt-64 relative z-10">
         <div className="grid md:grid-cols-[300px_1fr] gap-8">
-          {/* Poster */}
           {movie.poster_path && (
             <div className="hidden md:block">
               <Image
@@ -159,13 +154,11 @@ export default function MovieDetailsPage() {
             </div>
           )}
 
-          {/* Movie Details */}
           <div className="text-white">
             <h1 className="text-4xl font-bold mb-4 text-white drop-shadow-lg">
               {movie.title}
             </h1>
 
-            {/* Metadata */}
             <div className="flex items-center space-x-4 mb-6">
               <div className="flex items-center space-x-2">
                 <Star className="w-5 h-5 text-yellow-400" />
@@ -183,10 +176,8 @@ export default function MovieDetailsPage() {
               </div>
             </div>
 
-            {/* Overview */}
             <p className="text-gray-200 mb-6 max-w-2xl">{movie.overview}</p>
 
-            {/* Action Buttons */}
             <div className="flex space-x-4">
               <button
                 className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2"
@@ -208,7 +199,6 @@ export default function MovieDetailsPage() {
           </div>
         </div>
 
-        {/* Trailer */}
         {trailer && (
           <div className="mt-12 bg-gray-900 rounded-xl overflow-hidden shadow-2xl">
             <YouTube videoId={trailer} className="w-full aspect-video" />

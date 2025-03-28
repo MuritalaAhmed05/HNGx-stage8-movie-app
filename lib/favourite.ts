@@ -1,7 +1,6 @@
 import { db } from "@/app/firebase";
 import { doc, setDoc, deleteDoc, getDoc, collection, getDocs } from "firebase/firestore";
-
-// Add a movie to the user's favorites
+import { Movie } from "@/app/service/types"; 
 export const addToFavorites = async (userId: string, movie: any) => {
     if (!userId || !movie) throw new Error("Invalid user or movie data.");
   
@@ -12,7 +11,7 @@ export const addToFavorites = async (userId: string, movie: any) => {
         poster_path: movie.poster_path,
         release_date: movie.release_date,
         vote_average: movie.vote_average,
-        genre_ids: movie.genre_ids ?? [], // ✅ Ensure it's always an array
+        genre_ids: movie.genre_ids ?? [], 
       };
   
       await setDoc(
@@ -26,7 +25,6 @@ export const addToFavorites = async (userId: string, movie: any) => {
     }
   };
 
-// Remove a movie from favorites
 export const removeFromFavorites = async (userId: string, movieId: number) => {
   if (!userId) throw new Error("User ID is required");
 
@@ -40,7 +38,6 @@ export const removeFromFavorites = async (userId: string, movieId: number) => {
   }
 };
 
-// Check if a movie is in favorites
 export const isFavorite = async (userId: string, movieId: number) => {
   if (!userId) return false;
 
@@ -55,7 +52,24 @@ export const isFavorite = async (userId: string, movieId: number) => {
   }
 };
 
-// Fetch favorite movies for a user
+// export const getFavorites = async (userId: string) => {
+//   if (!userId) throw new Error("User ID is required");
+
+//   try {
+//     const favoritesRef = collection(db, "users", userId, "favorites");
+//     const snapshot = await getDocs(favoritesRef);
+
+//     const favoriteMovies = snapshot.docs.map((doc) => ({
+//       id: doc.id,
+//       ...doc.data(),
+//     }));
+
+//     return favoriteMovies;
+//   } catch (error) {
+//     console.error("Error fetching favorites:", error);
+//     return [];
+//   }
+// };
 export const getFavorites = async (userId: string) => {
   if (!userId) throw new Error("User ID is required");
 
@@ -63,10 +77,17 @@ export const getFavorites = async (userId: string) => {
     const favoritesRef = collection(db, "users", userId, "favorites");
     const snapshot = await getDocs(favoritesRef);
 
-    const favoriteMovies = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const favoriteMovies = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: Number(doc.id), // Convert Firestore ID to number
+        title: data.title,
+        poster_path: data.poster_path,
+        release_date: data.release_date,
+        vote_average: data.vote_average,
+        genre_ids: data.genre_ids ?? [], // Ensure genre_ids exists as an array
+      } as Movie;
+    });
 
     return favoriteMovies;
   } catch (error) {

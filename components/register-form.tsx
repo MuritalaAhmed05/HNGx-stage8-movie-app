@@ -16,7 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation"
 
 
-// Define form validation schema
 const schema = z.object({
   username: z
     .string()

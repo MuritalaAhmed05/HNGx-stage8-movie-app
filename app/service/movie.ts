@@ -14,24 +14,7 @@ export interface TMDBResponse {
   results: Movie[];
 }
 
-// export const fetchMovies = async (query = ""): Promise<TMDBResponse> => {
-//   const url = query
-//     ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-//     : `${BASE_URL}/movie/popular?api_key=${API_KEY}`;
 
-//   try {
-//     const res = await fetch(url);
-//     if (!res.ok) throw new Error(`Failed to fetch movies: ${res.statusText}`);
-
-//     const data = await res.json();
-
-//     // Ensure results exist and return correctly
-//     return { results: Array.isArray(data.results) ? data.results : [] };
-//   } catch (error) {
-//     console.error("Error fetching movies:", error);
-//     return { results: [] }; // Prevents app crashes
-//   }
-// };
 
 export const fetchMovies = async (searchTerm = "") => {
   const baseUrl = "https://api.themoviedb.org/3";
