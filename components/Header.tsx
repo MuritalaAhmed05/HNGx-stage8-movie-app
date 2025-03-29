@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@/app/firebase";
 import { User, signOut } from "firebase/auth";
@@ -24,7 +24,7 @@ type Movie = {
   vote_average: number;
   genre_ids: number[];
 };
-export function Header() {
+function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -331,5 +331,12 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+export default function Haeder() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <Header />
+    </Suspense>
   );
 }
