@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-
+import { useRouter } from "next/navigation";
 
 type Movie = {
   id: number;
@@ -25,6 +25,7 @@ export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<{ [key: number]: boolean }>({});
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (!user) {
@@ -55,6 +56,7 @@ export default function FavoritesPage() {
 
   const handleFavorite = async (movie: Movie) => {
     if (!user) {
+      router.push("/login");
       toast.error("You need to be logged in to favorite movies!");
       return;
     }
@@ -109,7 +111,7 @@ export default function FavoritesPage() {
           <p>Loading your favorites...</p>
         </div>
       ) : movies.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {movies.map((movie) => (
             <MovieCard
               key={movie.id}

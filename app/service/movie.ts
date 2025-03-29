@@ -14,15 +14,10 @@ export interface TMDBResponse {
   results: Movie[];
 }
 
-
-
 export const fetchMovies = async (searchTerm = "") => {
-  const baseUrl = "https://api.themoviedb.org/3";
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-  
   const url = searchTerm.trim()
-    ? `${baseUrl}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(searchTerm)}`
-    : `${baseUrl}/movie/popular?api_key=${apiKey}`;
+    ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchTerm)}`
+    : `${BASE_URL}/movie/popular?api_key=${API_KEY}`;
 
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to fetch movies");
@@ -31,14 +26,11 @@ export const fetchMovies = async (searchTerm = "") => {
 };
 
 export const fetchMoviesByCategory = async (category: string, page = 1) => {
-  const baseUrl = "https://api.themoviedb.org/3";
-  const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
-
   let endpoint;
   if (category === "trending") {
-    endpoint = `${baseUrl}/trending/movie/week?api_key=${apiKey}&page=${page}`;
+    endpoint = `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&page=${page}`;
   } else {
-    endpoint = `${baseUrl}/movie/${category}?api_key=${apiKey}&page=${page}`;
+    endpoint = `${BASE_URL}/movie/${category}?api_key=${API_KEY}&page=${page}`;
   }
 
   const response = await fetch(endpoint);
@@ -46,3 +38,11 @@ export const fetchMoviesByCategory = async (category: string, page = 1) => {
 
   return response.json();
 };
+
+export async function searchMovies(query: string) {
+  const res = await fetch(
+    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+  );
+  const data = await res.json();
+  return data.results || [];
+}
