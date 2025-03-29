@@ -24,10 +24,10 @@ const MovieCard: React.FC<MovieCardProps> = ({
     <div className="bg-white dark:bg-[#121212] rounded-lg overflow-hidden relative">
       <button
         onClick={() => onFavoriteToggle(movie)}
-        className="absolute top-3 right-3 bg-white/70 dark:bg-gray-700/70 p-2 rounded-full"
+        className="absolute top-3 right-3 bg-white/70 dark:bg-gray-700/70 p-2 rounded-full cursor-pointer"
       >
         <Heart
-          className={`h-5 w-5 ${isFavorite ? "text-red-500" : "text-gray-500"}`}
+          className={`h-5 w-5 ${isFavorite ? "text-red-500" : "text-gray-500"} hover:text-red-500`}
         />
       </button>
 

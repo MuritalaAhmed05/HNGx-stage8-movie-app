@@ -13,9 +13,8 @@ export default function HeroSection() {
   useEffect(() => {
     const getRandomMovie = async () => {
       try {
-        const data = await fetchMovies(); // TypeScript now knows data.results exists
+        const data = await fetchMovies(); 
 
-        console.log("Fetched movies:", data);
 
         if (data.results.length > 0) {
           const randomMovie = data.results[Math.floor(Math.random() * data.results.length)];
@@ -33,11 +32,9 @@ export default function HeroSection() {
 
   if (loading) {
     return (
-      <div className="relative w-full h-[500px] md:h-[600px] bg-gray-900">
-        {/* Skeleton Background */}
+      <div className="relative w-full h-[500px] md:h-[600px] bg-gray-200">
         <Skeleton className="absolute inset-0 h-full w-full bg-gray-800 opacity-50" />
 
-        {/* Skeleton Content */}
         <div className="absolute top-1/3 left-10 md:left-16 max-w-2xl">
           <Skeleton className="w-48 h-10 rounded-md bg-gray-700" />
           <Skeleton className="w-72 h-6 rounded-md bg-gray-700 mt-3" />
@@ -53,7 +50,6 @@ export default function HeroSection() {
   return (
     <Link key={movie.id} href={`/movie/${movie.id}`} passHref>
         <div className="relative w-full h-[500px] md:h-[600px] text-white">
-          {/* Background Image */}
           <Image
             src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
             alt={movie.title}
@@ -61,20 +57,16 @@ export default function HeroSection() {
             className="object-cover"
             priority
           />
-          {/* Overlay */}
           <div className="absolute inset-0 bg-black/30" />
-          {/* Content */}
           <div className="absolute top-1/4 left-10 md:left-16 max-w-2xl">
             <h1 className="text-4xl md:text-7xl font-bold">{movie.title}</h1>
             <p className="mt-3 text-lg max-w-lg">{movie.overview.slice(0, 150)}...</p>
-            {/* Ratings */}
             <div className="flex items-center gap-3 mt-3">
               <span className="bg-yellow-400 text-black px-2 py-1 rounded-md font-bold">
                 IMDb {movie.vote_average} / 10
               </span>
               <span className="text-red-500 font-bold">🍅 {Math.round(movie.vote_average * 10)}%</span>
             </div>
-            {/* Watch Trailer Button */}
             <button className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded-md font-semibold">
               🎬 Watch trailer
             </button>

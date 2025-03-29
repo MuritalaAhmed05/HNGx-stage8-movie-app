@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchMovies } from "../service/movie";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { ChevronRight, Heart } from "lucide-react";
 import HeroSection from "@/components/Hero";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -72,6 +72,7 @@ export default function Home() {
   const handleFavorite = async (movie: any) => {
     if (!user) {
       router.push("/login");
+       toast.error("You need to be logged in to add to favorite!");
       return;
     }
   
@@ -96,10 +97,10 @@ export default function Home() {
     }
   };
   
-
   const handleMovieClick = (movieId: number) => {
     if (!user) {
       router.push("/login");
+       toast.error("You need to be logged in to view movie details!");
       return;
     }
     router.push(`/movie/${movieId}`);
@@ -109,18 +110,21 @@ export default function Home() {
     <div className="bg-white dark:bg-[#121212] text-gray-900 dark:text-white">
       <HeroSection />
       <div className="p-4 md:p-8 lg:p-12 xl:p-24">
-        <h1 className="text-2xl font-bold mb-6">Popular Movies</h1>
+        <div className="flex items-center justify-between text-blue-900">
+          <h1 className="text-2xl font-bold mb-6">Popular Movies</h1>
+          <Link href="/movies" className="font-semibold flex justify-center items-center">See more  <ChevronRight /></Link>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {loading
             ? [...Array(8)].map((_, index) => <MovieCardSkeleton key={index} />)
             : movies.map((movie) => (
-                <div key={movie.id} className="relative">
+                <div key={movie.id} className="relative group">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleFavorite(movie);
                     }}
-                    className="absolute top-3 right-3 bg-white/60 dark:bg-gray-700/60 p-2 rounded-full z-10"
+                    className="cursor-pointer absolute top-3 right-3 bg-white/60 dark:bg-gray-700/60 p-2 rounded-full z-10 transition-transform duration-300 hover:scale-110"
                   >
                     {favorites[movie.id] ? (
                       <Heart className="h-5 w-5 text-red-500" />
@@ -128,20 +132,25 @@ export default function Home() {
                       <Heart className="h-5 w-5 text-gray-500 dark:text-white hover:text-red-500" />
                     )}
                   </button>
-                  <div onClick={() => handleMovieClick(movie.id)} className="cursor-pointer">
+                  <div 
+                    onClick={() => handleMovieClick(movie.id)} 
+                    className="cursor-pointer transition-all duration-300 transform group-hover:scale-105 "
+                  >
                     <div className="bg-white dark:bg-[#121212] rounded-lg overflow-hidden">
-                      <Image
-                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                        alt={movie.title}
-                        width={300}
-                        height={450}
-                        className="w-full h-[350px] object-cover rounded-t-lg"
-                      />
+                      <div className="overflow-hidden">
+                        <Image
+                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                          alt={movie.title}
+                          width={300}
+                          height={450}
+                          className="w-full h-[350px] object-cover rounded-t-lg transition-transform duration-500 group-hover:scale-110"
+                        />
+                      </div>
                       <div className="pt-4">
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           USA {movie.release_date}
                         </p>
-                        <h2 className="text-lg font-semibold truncate">{movie.title}</h2>
+                        <h2 className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{movie.title}</h2>
                         <div className="flex items-center gap-2 mt-2">
                           <span className="bg-yellow-500 text-white px-2 py-1 text-xs rounded">
                             IMDb
