@@ -46,3 +46,14 @@ export async function searchMovies(query: string) {
   const data = await res.json();
   return data.results || [];
 }
+
+export async function fetchPopularTVShows() {
+  try {
+    const res = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}`);
+    const data = await res.json();
+    return data.results || [];
+  } catch (error) {
+    console.error("Error fetching TV shows:", error);
+    return [];
+  }
+}
