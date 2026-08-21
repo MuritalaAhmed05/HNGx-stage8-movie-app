@@ -321,17 +321,69 @@ function HeaderContent() {
 
       {/* Mobile Search Expandable Bar */}
       {isSearchOpen && (
-        <div className="md:hidden px-4 py-3 bg-slate-950 border-b border-white/10 animate-in slide-in-from-top duration-200">
+        <div className="md:hidden px-4 py-3 bg-slate-950 border-b border-white/10 relative animate-in slide-in-from-top duration-200">
           <form onSubmit={handleSearchSubmit} className="relative">
             <input
               type="text"
               placeholder="Search movies, TV shows..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery.trim().length > 1 && setShowSuggestions(true)}
               className="w-full pl-10 pr-4 py-2 text-sm rounded-full bg-slate-900 border border-white/20 text-white focus:outline-none focus:border-red-500"
             />
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           </form>
+
+          {/* Mobile Autocomplete Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="mt-2 bg-slate-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden divide-y divide-white/5 max-h-80 overflow-y-auto">
+              {suggestions.map((movie) => (
+                <Link
+                  key={movie.id}
+                  href={`/movie/${movie.id}`}
+                  onClick={() => {
+                    setShowSuggestions(false);
+                    setIsSearchOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/10 transition-colors"
+                >
+                  <div className="relative w-10 h-14 rounded overflow-hidden flex-shrink-0 bg-slate-800">
+                    {movie.poster_path ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+                        alt={movie.title}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <Film className="w-5 h-5 m-auto text-gray-500" />
+                    )}
+                  </div>
+                  <div className="flex-grow min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{movie.title}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                      <span>{movie.release_date ? movie.release_date.slice(0, 4) : "N/A"}</span>
+                      {Boolean(movie.vote_average) && (
+                        <span className="flex items-center gap-1 text-amber-400 font-medium">
+                          <Star size={12} className="fill-amber-400" /> {movie.vote_average?.toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+              <Link
+                href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                onClick={() => {
+                  setShowSuggestions(false);
+                  setIsSearchOpen(false);
+                }}
+                className="block text-center py-2.5 text-xs font-semibold text-red-400 hover:text-red-300 bg-black/40"
+              >
+                View all results &rarr;
+              </Link>
+            </div>
+          )}
         </div>
       )}
 

@@ -155,7 +155,7 @@ export default function SurpriseMeModal({ isOpen, onClose }: SurpriseMeModalProp
               <button
                 onClick={rollDice}
                 disabled={isSpinning}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-red-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 transition-all disabled:opacity-50"
               >
                 <Dices size={18} className={isSpinning ? "animate-spin" : ""} />
                 {isSpinning ? "Spinning Movie Wheel..." : pickedMovie ? "Roll Again 🎲" : "Roll Movie Dice 🎲"}
