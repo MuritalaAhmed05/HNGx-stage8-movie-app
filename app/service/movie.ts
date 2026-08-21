@@ -105,21 +105,16 @@ const FALLBACK_MOVIES: Movie[] = [
   }
 ];
 
-export const fetchMovies = async (searchTerm = ""): Promise<TMDBResponse> => {
+export const fetchMovies = async (category = "popular", page = 1): Promise<TMDBResponse> => {
   if (!API_KEY) {
     console.warn("NEXT_PUBLIC_TMDB_API_KEY is not configured. Using fallback movies data.");
-    const filtered = searchTerm.trim()
-      ? FALLBACK_MOVIES.filter((m) =>
-          m.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : FALLBACK_MOVIES;
-    return { results: filtered, total_pages: 1, total_results: filtered.length };
+    return { results: FALLBACK_MOVIES, total_pages: 1, total_results: FALLBACK_MOVIES.length };
   }
 
   try {
-    const url = searchTerm.trim()
-      ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(searchTerm)}`
-      : `${BASE_URL}/movie/popular?api_key=${API_KEY}`;
+    const url = category === "trending"
+      ? `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&page=${page}`
+      : `${BASE_URL}/movie/${category}?api_key=${API_KEY}&page=${page}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch movies");
@@ -127,12 +122,7 @@ export const fetchMovies = async (searchTerm = ""): Promise<TMDBResponse> => {
     return data;
   } catch (error) {
     console.error("Error fetching movies from TMDB:", error);
-    const filtered = searchTerm.trim()
-      ? FALLBACK_MOVIES.filter((m) =>
-          m.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : FALLBACK_MOVIES;
-    return { results: filtered, total_pages: 1, total_results: filtered.length };
+    return { results: FALLBACK_MOVIES, total_pages: 1, total_results: FALLBACK_MOVIES.length };
   }
 };
 
