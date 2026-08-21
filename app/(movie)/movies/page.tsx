@@ -1,31 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchMoviesByCategory } from "@/app/service/movie";
+import { fetchMoviesByCategory, Movie } from "@/app/service/movie";
 import MovieCard from "@/components/MovieCard";
+import MovieCardSkeleton from "@/components/MovieCardSkeleton";
+import PaginationControls from "@/components/PaginationControls";
 import { addToFavorites, removeFromFavorites, isFavorite } from "@/lib/favourite";
 import { useAuth } from "@/app/hooks/useAuth";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Film, TrendingUp, Star, Clock, Play } from "lucide-react";
+import { Film, TrendingUp, Star, Clock, Play, Flame } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-type Movie = {
-  id: number;
-  title: string;
-  poster_path: string;
-  release_date: string;
-  vote_average: number;
-  genre_ids: number[];
-};
 
 const categories = [
-  { key: "popular", label: "Popular", icon: <TrendingUp size={18} /> },
-  { key: "top_rated", label: "Top Rated", icon: <Star size={18} /> },
-  { key: "upcoming", label: "Upcoming", icon: <Clock size={18} /> },
-  { key: "now_playing", label: "Now Playing", icon: <Play size={18} /> },
-  { key: "trending", label: "Trending", icon: <Film size={18} /> },
+  { key: "popular", label: "Popular", icon: <TrendingUp size={16} /> },
+  { key: "trending", label: "Trending", icon: <Flame size={16} /> },
+  { key: "top_rated", label: "Top Rated", icon: <Star size={16} /> },
+  { key: "upcoming", label: "Upcoming", icon: <Clock size={16} /> },
+  { key: "now_playing", label: "Now Playing", icon: <Play size={16} /> },
 ];
 
 export default function MoviesPage() {
@@ -56,13 +50,13 @@ export default function MoviesPage() {
       setIsLoading(true);
       try {
         const data = await fetchMoviesByCategory(selectedCategory, currentPage);
-        setMovies(data.results);
-        setTotalPages(data.total_pages);
+        setMovies(data.results || []);
+        setTotalPages(data.total_pages || 1);
       } catch (error) {
         console.error("Error fetching movies:", error);
-        toast.error("Failed to load movies. Please try again later.");
+        toast.error("Failed to load movies. Please try again.");
       } finally {
-        setTimeout(() => setIsLoading(false), 300);
+        setIsLoading(false);
       }
     };
 
@@ -75,8 +69,8 @@ export default function MoviesPage() {
 
   const handleFavorite = async (movie: Movie) => {
     if (!user) {
-        router.push("/login")
-      toast.error("You need to be logged in to add to favorite!");
+      router.push("/login");
+      toast.error("You need to be logged in to add to favorites!");
       return;
     }
 
@@ -97,142 +91,84 @@ export default function MoviesPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-10 max-w-7xl min-h-[85vh]">
+      {/* Header Banner */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="text-center max-w-2xl mx-auto mb-10 space-y-2"
       >
-        <h1 className="text-4xl font-bold mb-2 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl sm:text-5xl font-black text-gradient">
           Movies Collection
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
-          Discover and explore the best films from around the world
+        <p className="text-gray-400 text-sm sm:text-base">
+          Discover world-class cinema, box office blockbusters, and award-winning films.
         </p>
       </motion.div>
 
-      <div className="flex flex-wrap justify-center mb-8 gap-2">
+      {/* Category Pills Bar */}
+      <div className="flex flex-wrap justify-center mb-10 gap-2">
         {categories.map((category) => (
-          <motion.button
+          <button
             key={category.key}
             onClick={() => {
               setSelectedCategory(category.key);
               setCurrentPage(1);
             }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`px-4 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${
+            className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
               selectedCategory === category.key
-                ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                ? "bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-500/40"
+                : "bg-slate-900 text-gray-400 hover:text-white border border-white/10 hover:bg-slate-800"
             }`}
           >
-            <span>{category.icon}</span>
+            {category.icon}
             <span>{category.label}</span>
-          </motion.button>
+          </button>
         ))}
       </div>
 
-      {isLoading && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {/* Movies Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-6">
           {[...Array(8)].map((_, index) => (
-            <div key={index} className="rounded-lg overflow-hidden shadow-md bg-white dark:bg-gray-800 flex flex-col">
-              <Skeleton className="w-full h-64 rounded-t-lg" />
-              <div className="p-4 flex-1">
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2 mb-3" />
-                <div className="flex justify-between items-center">
-                  <Skeleton className="h-5 w-14" />
-                  <Skeleton className="h-8 w-8 rounded-full" />
-                </div>
-              </div>
-            </div>
+            <MovieCardSkeleton key={index} />
           ))}
         </div>
-      )}
-
-      {!isLoading && movies.length > 0 && (
+      ) : movies.length > 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-6"
         >
-          {movies.map((movie, index) => (
-            <motion.div
-              key={movie.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
+          <AnimatePresence>
+            {movies.map((movie) => (
               <MovieCard
+                key={movie.id}
                 movie={movie}
                 isFavorite={favorites[movie.id] ?? false}
                 onFavoriteToggle={() => handleFavorite(movie)}
               />
-            </motion.div>
-          ))}
+            ))}
+          </AnimatePresence>
         </motion.div>
-      )}
-
-      {!isLoading && movies.length === 0 && (
-        <div className="text-center py-12">
-          <Film size={64} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-          <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">No movies found</h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            We couldn't find any movies in this category. Try another category or check back later.
+      ) : (
+        <div className="text-center py-20 glass-card rounded-2xl max-w-xl mx-auto border border-white/10 p-8 space-y-4">
+          <Film size={48} className="mx-auto text-gray-500" />
+          <h3 className="text-xl font-bold text-white">No Movies Available</h3>
+          <p className="text-gray-400 text-sm">
+            We couldn&apos;t load movies for this category. Please try again.
           </p>
         </div>
       )}
 
+      {/* Pagination Controls */}
       {!isLoading && movies.length > 0 && (
-        <div className="flex flex-wrap justify-center items-center mt-10 space-x-2 space-y-2 sm:space-y-0">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(1)}
-            className="rounded-full px-3"
-          >
-            First
-          </Button>
-          <Button
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            className="rounded-full"
-          >
-            Previous
-          </Button>
-          
-          <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2">
-            <span className="font-medium text-gray-700 dark:text-gray-300">
-              Page {currentPage}
-            </span>
-            <span className="mx-2 text-gray-400">/</span>
-            <span className="text-gray-500 dark:text-gray-400">
-              {totalPages}
-            </span>
-          </div>
-          
-          <Button
-            variant="outline"
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="rounded-full"
-          >
-            Next
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage(totalPages)}
-            className="rounded-full px-3"
-          >
-            Last
-          </Button>
-        </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       )}
     </div>
   );

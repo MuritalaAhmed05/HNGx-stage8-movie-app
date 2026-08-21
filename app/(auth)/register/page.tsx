@@ -1,5 +1,6 @@
 import { RegisterForm } from "@/components/register-form"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function RegisterPage() {
   return (
@@ -16,21 +17,21 @@ export default function RegisterPage() {
       {/* Form Section (Scrollable) */}
       <div className="flex flex-col gap-4 p-6 md:p-10 overflow-y-auto">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                       <Image
-                         src="/logo.png"
-                         width={24}
-                         height={24}
-                         alt="Logo"
-                         
-                         >
-         
-                       </Image>
-                     </div>
-                    Flimzy
-                   </a>
-                 </div>
+          <Link href="/" className="flex items-center gap-2.5 font-bold">
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-white/10 bg-slate-900">
+              <Image
+                src="/logo.png"
+                width={32}
+                height={32}
+                alt="Filmzy Logo"
+                className="object-contain p-0.5"
+              />
+            </div>
+            <span className="text-xl font-extrabold text-white">
+              Film<span className="text-red-500">zy</span>
+            </span>
+          </Link>
+        </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
             <RegisterForm />

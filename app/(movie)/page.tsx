@@ -1,39 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMovies } from "../service/movie";
-import Image from "next/image";
-import { ChevronRight, Heart } from "lucide-react";
+import { fetchMoviesByCategory, Movie } from "../service/movie";
 import HeroSection from "@/components/Hero";
-import { Skeleton } from "@/components/ui/skeleton";
+import MovieCard from "@/components/MovieCard";
+import MovieCardSkeleton from "@/components/MovieCardSkeleton";
+import MoodPlaylists from "@/components/MoodPlaylists";
+import UpcomingCountdowns from "@/components/UpcomingCountdowns";
 import Link from "next/link";
 import { useAuth } from "../hooks/useAuth";
 import { addToFavorites, isFavorite, removeFromFavorites } from "@/lib/favourite";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ChevronRight, TrendingUp, Star, Play, Clock, Flame } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-const MovieCardSkeleton = () => (
-  <div className="bg-white dark:bg-gray-900 rounded-lg overflow-hidden relative">
-    <Skeleton className="absolute top-3 right-3 h-9 w-9 rounded-full" />
-    <Skeleton className="w-full h-[350px] rounded-t-lg" />
-    <div className="pt-4 space-y-3">
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-16" />
-      </div>
-      <Skeleton className="h-6 w-full" />
-      <div className="flex items-center gap-2 mt-2">
-        <Skeleton className="h-5 w-12" />
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="h-4 w-16" />
-      </div>
-      <Skeleton className="h-3 w-2/3" />
-    </div>
-  </div>
-);
+const CATEGORIES = [
+  { key: "popular", label: "Popular", icon: <TrendingUp size={16} /> },
+  { key: "trending", label: "Trending", icon: <Flame size={16} /> },
+  { key: "top_rated", label: "Top Rated", icon: <Star size={16} /> },
+  { key: "now_playing", label: "Now Playing", icon: <Play size={16} /> },
+  { key: "upcoming", label: "Upcoming", icon: <Clock size={16} /> },
+];
 
 export default function Home() {
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [activeCategory, setActiveCategory] = useState("popular");
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<{ [key: number]: boolean }>({});
   const { user } = useAuth();
@@ -41,9 +33,10 @@ export default function Home() {
 
   useEffect(() => {
     const getMovies = async () => {
+      setLoading(true);
       try {
-        const data = await fetchMovies();
-        setMovies(data.results);
+        const data = await fetchMoviesByCategory(activeCategory);
+        setMovies(data.results || []);
       } catch (error) {
         console.error("Error fetching movies:", error);
       } finally {
@@ -51,36 +44,31 @@ export default function Home() {
       }
     };
     getMovies();
-  }, []);
+  }, [activeCategory]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || movies.length === 0) return;
     const fetchFavorites = async () => {
       try {
-        const favMovies: { [key: number]: boolean } = {};
-        for (const movie of movies) {
-          favMovies[movie.id] = await isFavorite(user.uid, movie.id);
+        const favMap: { [key: number]: boolean } = {};
+        for (const m of movies) {
+          favMap[m.id] = await isFavorite(user.uid, m.id);
         }
-        setFavorites(favMovies);
+        setFavorites(favMap);
       } catch (error) {
-        console.error("Error fetching favorites:", error);
+        console.error("Error checking favorites:", error);
       }
     };
     fetchFavorites();
   }, [user, movies]);
 
-  const handleFavorite = async (movie: any) => {
+  const handleFavorite = async (movie: Movie) => {
     if (!user) {
       router.push("/login");
-       toast.error("You need to be logged in to add to favorite!");
+      toast.error("Please log in to add movies to your watchlist!");
       return;
     }
-  
-    if (!movie || typeof movie.id === "undefined") {
-      toast.error("Something went wrong with the movie data.");
-      return;
-    }
-  
+
     try {
       if (favorites[movie.id]) {
         await removeFromFavorites(user.uid, movie.id);
@@ -96,81 +84,85 @@ export default function Home() {
       toast.error("Something went wrong. Please try again.");
     }
   };
-  
-  const handleMovieClick = (movieId: number) => {
-    if (!user) {
-      router.push("/login");
-       toast.error("You need to be logged in to view movie details!");
-      return;
-    }
-    router.push(`/movie/${movieId}`);
-  };
 
   return (
-    <div className="bg-white dark:bg-[#121212] text-gray-900 dark:text-white">
+    <div className="bg-[#0b0f19] text-gray-100 min-h-screen pb-20">
+      {/* Featured Hero Section */}
       <HeroSection />
-      <div className="p-4 md:p-8 lg:p-12 xl:p-24">
-        <div className="flex items-center justify-between text-blue-900">
-          <h1 className="text-2xl font-bold mb-6">Popular Movies</h1>
-          <Link href="/movies" className="font-semibold flex justify-center items-center">See more  <ChevronRight /></Link>
+
+      {/* Main Content Area */}
+      <div className="container mx-auto px-4 sm:px-6 md:px-12 pt-12 space-y-8 max-w-7xl">
+        {/* Section Header & Category Selector Bar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-red-500 uppercase tracking-widest mb-1">
+              <Flame size={14} className="fill-current" /> Curated Cinema
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-gradient">
+              Discover Titles
+            </h2>
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.key}
+                onClick={() => setActiveCategory(cat.key)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                  activeCategory === cat.key
+                    ? "bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-500/40"
+                    : "bg-slate-900/80 text-gray-400 hover:text-white border border-white/10 hover:bg-slate-800"
+                }`}
+              >
+                {cat.icon}
+                <span>{cat.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {loading
-            ? [...Array(8)].map((_, index) => <MovieCardSkeleton key={index} />)
-            : movies.map((movie) => (
-                <div key={movie.id} className="relative group">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFavorite(movie);
-                    }}
-                    className="cursor-pointer absolute top-3 right-3 bg-white/60 dark:bg-gray-700/60 p-2 rounded-full z-10 transition-transform duration-300 hover:scale-110"
-                  >
-                    {favorites[movie.id] ? (
-                      <Heart className="h-5 w-5 text-red-500" />
-                    ) : (
-                      <Heart className="h-5 w-5 text-gray-500 dark:text-white hover:text-red-500" />
-                    )}
-                  </button>
-                  <div 
-                    onClick={() => handleMovieClick(movie.id)} 
-                    className="cursor-pointer transition-all duration-300 transform group-hover:scale-105 "
-                  >
-                    <div className="bg-white dark:bg-[#121212] rounded-lg overflow-hidden">
-                      <div className="overflow-hidden">
-                        <Image
-                          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                          alt={movie.title}
-                          width={300}
-                          height={450}
-                          className="w-full h-[350px] object-cover rounded-t-lg transition-transform duration-500 group-hover:scale-110"
-                        />
-                      </div>
-                      <div className="pt-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          USA {movie.release_date}
-                        </p>
-                        <h2 className="text-lg font-semibold truncate transition-colors duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{movie.title}</h2>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="bg-yellow-500 text-white px-2 py-1 text-xs rounded">
-                            IMDb
-                          </span>
-                          <span className="text-sm font-medium">
-                            {movie.vote_average} / 10
-                          </span>
-                          <span className="text-red-500 text-sm">
-                            🍅 {Math.round(movie.vote_average * 10)}%
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 pb-2">
-                          {movie.genre_ids.slice(0, 2).join(", ")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+        {/* Movies Grid */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <MovieCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-6"
+          >
+            <AnimatePresence>
+              {movies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  isFavorite={favorites[movie.id] || false}
+                  onFavoriteToggle={() => handleFavorite(movie)}
+                />
               ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* View All CTA Button */}
+        <div className="pt-8 text-center">
+          <Link
+            href="/movies"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-slate-900 hover:bg-slate-800 border border-white/15 text-white font-semibold text-sm shadow-xl transition-all hover:scale-105"
+          >
+            Browse Full Movies Library <ChevronRight size={18} />
+          </Link>
         </div>
+
+        {/* Mood-Based Binge Playlists */}
+        <MoodPlaylists />
+
+        {/* Upcoming Premiere Release Countdowns */}
+        <UpcomingCountdowns />
       </div>
     </div>
   );

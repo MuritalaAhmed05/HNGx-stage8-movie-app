@@ -1,11 +1,18 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: {
-      domains: ["image.tmdb.org"],
-  },
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-  },
-}
+import type { NextConfig } from "next";
 
-module.exports = nextConfig
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "image.tmdb.org",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
