@@ -188,9 +188,9 @@ function HeaderContent() {
                     <p className="text-sm font-semibold text-white truncate">{movie.title}</p>
                     <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                       <span>{movie.release_date ? movie.release_date.slice(0, 4) : "N/A"}</span>
-                      {movie.vote_average > 0 && (
+                      {Boolean(movie.vote_average) && (
                         <span className="flex items-center gap-1 text-amber-400 font-medium">
-                          <Star size={12} className="fill-amber-400" /> {movie.vote_average.toFixed(1)}
+                          <Star size={12} className="fill-amber-400" /> {movie.vote_average?.toFixed(1)}
                         </span>
                       )}
                     </div>
