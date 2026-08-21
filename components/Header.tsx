@@ -16,17 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { searchMovies } from "@/app/service/movie";
+import { searchMovies, Movie } from "@/app/service/movie";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-type Movie = {
-  id: number;
-  title: string;
-  poster_path: string;
-  release_date?: string;
-  first_air_date?: string;
-  vote_average: number;
-};
+
 
 function HeaderContent() {
   const [user, setUser] = useState<User | null>(null);
